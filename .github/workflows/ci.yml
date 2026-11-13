@@ -1,0 +1,45 @@
+name: Expo CI
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - main
+
+  push:
+    branches:
+      - develop
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  quality-check:
+    name: Mobile CI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Expo lint
+        run: npm run lint
+
+      - name: Generate Expo Router types
+        run: npx expo customize tsconfig.json
+
+      - name: Check TypeScript
+        run: npx tsc --noEmit
+
+      - name: Export Expo bundles
+        run: npx expo export --platform all
